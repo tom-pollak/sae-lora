@@ -192,10 +192,12 @@ class SaeTrainer:
         module_to_name = {v: k for k, v in name_to_module.items()}
 
         def hook(module: nn.Module, _, outputs):
+            # Maybe unpack tuple outputs
+            if isinstance(outputs, tuple):
+                outputs = outputs[0]
+
             name = module_to_name[module]
-            assert hasattr(module, 'lora_output')
-            activation = module.lora_output.detach()
-            hidden_dict[name] = activation.flatten(0, 1)
+            hidden_dict[name] = outputs.flatten(0, 1)
 
         for batch in dl:
             hidden_dict.clear()
