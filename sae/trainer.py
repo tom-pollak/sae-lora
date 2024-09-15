@@ -18,6 +18,7 @@ from .config import TrainConfig
 from .data import MemmapDataset
 from .sae import Sae
 from .utils import geometric_median, get_layer_list, resolve_widths
+from .lora import LoraLinearWithHook
 
 
 class SaeTrainer:
@@ -191,12 +192,14 @@ class SaeTrainer:
         maybe_wrapped: dict[str, DDP] | dict[str, Sae] = {}
         module_to_name = {v: k for k, v in name_to_module.items()}
 
-        def hook(module: nn.Module, _, outputs):
+        def hook(module: nn.Module, inputs, outputs):
             # Maybe unpack tuple outputs
             if isinstance(outputs, tuple):
                 outputs = outputs[0]
 
             name = module_to_name[module]
+            if isinstance(module, LoraLinearWithHook):
+                outputs = module.compute_lora_result(inputs)
             hidden_dict[name] = outputs.flatten(0, 1)
 
         for batch in dl:
