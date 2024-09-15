@@ -167,9 +167,9 @@ class SaeTrainer:
             shuffle=False,
         )
         pbar = tqdm(
-            desc="Training", 
-            disable=not rank_zero, 
-            initial=self.global_step, 
+            desc="Training",
+            disable=not rank_zero,
+            initial=self.global_step,
             total=num_batches,
         )
 
@@ -205,7 +205,7 @@ class SaeTrainer:
             # Bookkeeping for dead feature detection
             num_tokens_in_step += batch["input_ids"].numel()
 
-            # Forward pass on the model to get the next batch of activations            
+            # Forward pass on the model to get the next batch of activations
             handles = [
                 mod.register_forward_hook(hook) for mod in name_to_module.values()
             ]
@@ -349,7 +349,7 @@ class SaeTrainer:
 
                 if (step + 1) % self.cfg.save_every == 0:
                     self.save()
-                
+
             self.global_step += 1
             pbar.update()
 
@@ -446,7 +446,7 @@ class SaeTrainer:
                 assert isinstance(sae, Sae)
 
                 sae.save_to_disk(f"{path}/{hook}")
-    
+
         if rank_zero:
             torch.save(self.lr_scheduler.state_dict(), f"{path}/lr_scheduler.pt")
             torch.save(self.optimizer.state_dict(), f"{path}/optimizer.pt")
